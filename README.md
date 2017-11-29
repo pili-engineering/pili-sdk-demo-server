@@ -2,7 +2,7 @@
 七牛直播/连麦 SDK 官方 demo 的后台业务服务器代码
 
 ## 编译运行
-参考 [Deploy.md] (./Deploy.md)
+参考 [Deploy.md](./Deploy.md)
 
 ***
 
@@ -42,6 +42,7 @@ Content-Type: application/json
 ```
 POST /pili/v1/user/new
 Content-Type: application/json
+Authorization:<adminAuthorization>
 
 {
 	"name":<name>,
@@ -49,6 +50,7 @@ Content-Type: application/json
 	"room":<room>
 }
 ```
+* `<AdminAuthorization>`:admin鉴权，必填
 * `<Name>`:用户名，必填
 * `<Password>`:密码，必填
 * `<Room>`:连麦房间，必填
