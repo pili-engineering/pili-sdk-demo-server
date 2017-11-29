@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta http-equiv="Content-type" content="text/html; charset=us-ascii" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="description" content="" />
+
+    <title>ActionScript Publisher</title>
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic|Play:400,700|Oswald:300|Raleway:100,300" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="https://www.cine.io/images/cine-icon.png" />
+
+    <style type="text/css">
+    input {
+      width: 100%;
+    }
+
+    button {
+      margin-top: 1em;
+    }
+
+    #publisher > h3 {
+      text-align: center;
+    }
+
+    #status {
+      color: blue;
+      margin-bottom: 1em;
+    }
+    #publisher{
+      outline: 1px dotted red;
+    }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="row preview">
+        <div id="name" class="col-md-12">
+          <h2 class="">Live-streaming from the Browser</h2>
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="status" class="col-md-12"></div>
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-4">
+          <form id="publisher-inputs" class="form-horizontal">
+            <div class="control-group advanced" _style="display: none;">
+              <label class="control-label" for="serverUrl">RTMP URL:</label>
+              <div class="controls">
+                <input type="text" id="serverUrl" name="serverUrl" value="{{.pubRtmpUrlBase}}">
+              </div>
+            </div>
+
+            <div class="control-group advanced" _style="display: none;">
+              <label class="control-label" for="streamName">Stream Name</label>
+              <div class="controls">
+                <input type="text" id="streamName" name="streamName" value="{{.pubRtmpUrlStream}}">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="streamKey">Audio Type</label>
+              <div class="controls">
+                <select id="audioCodec" name="audioCodec">
+                   <!-- <option value="Speex">Speech</option> -->
+                   <option value="NellyMoser" selected>aac</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="resolution">Resolution</label>
+              <div class="controls">
+                <div class="row">
+                  <div class="col-md-4">
+                    <input type="text" id="streamWidth" name="streamWidth" value="1280">
+                  </div>
+                  <div class="col-md-2">x</div>
+                  <div class="col-md-4">
+                    <input type="text" id="streamHeight" name="streamHeight" value="720">
+                  </div>
+                  <div class="col-md-2">pixels</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="videoSettings">Video Settings</label>
+              <div class="controls">
+                <div class="row">
+                  <div class="col-md-4">
+                    <input type="text" id="streamFPS" name="streamFPS" value="30">
+                  </div>
+                  <div class="col-md-8">fps</div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <input type="text" id="keyFrameInterval" name="keyFrameInterval" value="3">
+                  </div>
+                  <div class="col-md-8">seconds (keyframe interval)</div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <input type="text" id="bandwidth" name="bandwidth" value="1500">
+                  </div>
+                  <div class="col-md-8">Kbps</div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <input type="text" id="videoQuality" name="videoQuality" value="75">
+                  </div>
+                  <div class="col-md-8">% (quality)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="controls">
+                <button class="col-md-3 btn btn-success start-btn">Start</button>
+                <button class="col-md-3 col-md-offset-1 btn btn-info preview-btn">Preview</button>
+                <button class="col-md-3 col-md-offset-1 btn btn-danger stop-btn">Stop</button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="col-md-7 col-md-offset-1">
+          <h2>Publisher</h2>
+          <div id="publisher">
+            <h3>If your browser supports streaming, you'll<br>see the recorded video here.</h3>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+
+    <script type="text/javascript">
+
+      function startPublishing(event){
+        if(event){ event.preventDefault();}
+        console.log("starting")
+        var
+          publisher = $('#publisher')[0]
+          , options = getOptions()
+
+        publisher.setOptions(options)
+        publisher.start()
+      }
+
+      function getOptions(){
+        var
+          $form = $('form#publisher-inputs')
+          , fps = parseInt($form.find('#streamFPS').val())
+          , intervalSecs = parseInt($form.find('#keyFrameInterval').val());
+
+        return {
+              serverURL: $form.find('#serverUrl').val()
+            , streamName: $form.find('#streamName').val()
+            , streamKey: $form.find('#streamKey').val()
+            , audioCodec: $form.find('#audioCodec').val()
+            , streamWidth: parseInt($form.find('#streamWidth').val())
+            , streamHeight: parseInt($form.find('#streamHeight').val())
+            , streamFPS: fps
+            , keyFrameInterval: fps * intervalSecs
+            , bandwidth: parseInt($form.find('#bandwidth').val()) * 1024 * 8
+            , videoQuality: parseInt($form.find('#videoQuality').val())
+            , embedTimecode: true
+            , timecodeFrequency: 1000
+          }
+      }
+
+
+    $(function() {
+
+      var swfVersionStr = "11.4.0"
+        , xiSwfUrlStr = "playerProductInstall.swf"
+        , flashvars = {}
+        , params = {}
+        , attributes = {}
+
+      params.allowscriptaccess = "sameDomain"
+      params.allowfullscreen = "true"
+      attributes.id = "publisher"
+      attributes.name = "Publisher"
+      attributes.align = "middle"
+      swfobject.embedSWF(
+        "../assets/publisher/publisher.swf", "publisher", "640", "400",
+        swfVersionStr, xiSwfUrlStr,
+        flashvars, params, attributes,
+        function(embedEvent) {
+          if (embedEvent.success) {
+            // need to wait a bit until initialization finishes
+            setTimeout(function() {
+              embedEvent.ref.setOptions({
+                jsLogFunction: "console.log",
+                jsEmitFunction: "handleEmit" }
+              )
+            }, 2000)
+            updateStatus("Configure your stream, then press start.")
+          }
+        }
+      )
+
+      $('.start-btn').on('click', function(event) {
+        startPublishing(event);
+      })
+
+      $('.preview-btn').on('click', function(event) {
+        event.preventDefault()
+        var
+          publisher = $('#publisher')[0],
+          options = getOptions()
+
+        publisher.setOptions(options)
+        publisher.preview()
+      })
+
+      $('.stop-btn').on('click', function(event) {
+        event.preventDefault()
+        var publisher = $('#publisher')[0]
+        publisher.stop()
+      })
+
+    });
+    function handleEmit(event) {
+      switch(event.kind) {
+        case "connect":
+        case "disconnect":
+        case "publish":
+        case "status":
+        case "error":
+          console.log("got event", new Date, event)
+          updateStatus(event.message)
+          break
+        default:
+          console.log(new Date, event)
+      }
+      // if (event.kind == 'disconnect'){
+      //   startPublishing();
+      // }
+    }
+    function updateStatus(message) {
+      var $statusDiv = $('#status')
+      $statusDiv.text(message)
+    }
+    </script>
+
+
+  </body>
+</html>

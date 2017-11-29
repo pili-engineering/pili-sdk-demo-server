@@ -1,0 +1,44 @@
+
+	//create saller
+	router.POST("/pili/v1/saller/new", func(c *gin.Context) {
+
+	})
+
+	//saller login
+	router.POST("/pili/v1/saller/login", func(c *gin.Context) {
+		var reqInfo model.ReqLoginBody
+		rErr := c.BindJSON(&reqInfo)
+		if rErr != nil {
+			log.Errorf("request paramter error,%s\n", rErr)
+			c.JSON(400, gin.H{
+				"code":    400,
+				"message": "the request's paramter error",
+			})
+			c.Abort()
+			return
+		}
+		if reqInfo.Name == "" || reqInfo.Password == "" {
+			log.Errorf("name or password is null")
+			c.JSON(400, gin.H{
+				"code":    400,
+				"message": "name or password is null",
+			})
+			c.Abort()
+			return
+		}
+
+		err := cli.QuerySaller(reqInfo.Name, reqInfo.Password)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"code":    400,
+				"message": "name or password is wrong",
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(200, gin.H{
+			"code":    200,
+			"message": "ok",
+		})
+		return
+	})

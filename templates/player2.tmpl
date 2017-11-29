@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <title>Player Demo</title>
+
+  <link rel="stylesheet" type="text/css" href="//dn-cdnjscn.qbox.me/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
+  <style type="text/css">
+    body{ padding: 20px; }
+    #player-wrap{
+      width: 640px;
+      height: 480px;
+    }
+    .table{
+      width: 640px;
+      margin-top: 20px;
+    }
+  </style>
+
+  <script src="https://dn-pili-static.qbox.me/javascripts/jquery-2.1.3.min.js"></script>
+  <script type="text/javascript">
+    $(function(){
+      getStreamStatus = function(){
+        $.getJSON("/api/stream/{{.stream}}/status", function(data) {
+          $('#status').text("connected");
+          $('#status-addr').text(data.clientIP);
+          $('#startFrom').text(new Date(parseInt(data.startAt) * 1000).toLocaleString());
+          $('#bps').text((data.bps * 8 / 1024).toFixed(2));
+          $('#fps-audio').text(data.fps.audio.toFixed(2));
+          $('#fps-video').text(data.fps.video.toFixed(2));
+          $('#fps-data').text(data.fps.data.toFixed(2));
+          setTimeout(getStreamStatus, 1000 * 5)
+        });
+      }
+      getStreamStatus()
+    })
+  </script>
+
+</head>
+<body>
+    <div id="player-wrap">
+        <script type="text/javascript" src="../assets/player/sewise.player.min.js?server=live&type=rtmp&streamurl={{.liveRtmpUrl}}&autostart=true&buffer=5&lang=zh_CN&title=LiveVideo&skin=liveWhite"></script>
+    </div>
+
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th colspan="2">Live play urls</th>
+      </tr>
+    </tbody>
+    <tbody>
+      <tr>
+        <th>RTMP</th>
+        <td>{{.liveRtmpUrl}}</td>
+      </tr>
+      <tr>
+        <th>HLS</th>
+        <td>{{.liveHlsUrl}}</td>
+      </tr>
+      <tr>
+        <th>HDL</th>
+        <td>{{.liveHdlUrl}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th>推流状态:</th>
+        <td><span id="status"></span></td>
+      </tr>
+      <tr>
+        <th>推流客户端 IP:</th>
+        <td><span id="status-addr"></span></td>
+      </tr>
+      <tr>
+        <th>推流开始时间:</th>
+        <td><span id="startFrom"></span></td>
+      </tr>
+      <tr>
+        <th>推流实时码率:</th>
+        <td><span id="bps"></span> kbit/s</td>
+      </tr>
+      <tr>
+        <th colspan="2">推流实时帧率:</th>
+      </tr>
+      <tr>
+        <tr>
+          <td>Audio:</td>
+          <td><span id="fps-audio"></span> fps</td>
+        </tr>
+        <tr>
+          <td>Video:</td>
+          <td><span id="fps-video"></span> fps</td>
+        </tr>
+        <tr>
+          <td>Data:</td>
+          <td><span id="fps-data"></span> fps</td>
+        </tr>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
